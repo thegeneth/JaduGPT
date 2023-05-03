@@ -81,61 +81,31 @@ const handler = async (req: NextApiRequest, res: NextApiResponse<any>) => {
     const filteredSources: GoogleSource[] = sourcesWithText.filter(Boolean);
 
     const answerPrompt = endent`
-    Provide me with the information I requested. Use the sources to provide an accurate response. Respond in markdown format. Cite the sources you used as a markdown link as you use them at the end of each sentence by number of the source (ex: [[1]](link.com)). Provide an accurate response and then stop. Today's date is ${new Date().toLocaleDateString()}.
+     You will to provide me with the information I request in the language I request.  Use the sources to provide an accurate response. Respond in markdown format. Cite the sources you used as a markdown link as you use them at the end of each sentence by number of the source (ex: [[1]](link.com)). Provide an accurate response and then stop. Today's date is ${new Date().toLocaleDateString()}.
 
-    Example Input:
-    What's the weather in San Francisco today?
+     Example Input:
+     What's the weather in San Francisco today?
 
-    Example Sources:
-    [Weather in San Francisco](https://www.google.com/search?q=weather+san+francisco)
+     Example Sources:
+     {
+      title: "Weather in San Francisco",
+      link: "https:www.google.com/search?q=weather+san+francisco",
+      content: "The weather cast is 70 degrees and sunny in San Francisco today."
+      }
 
-    Example Response:
-    It's 70 degrees and sunny in San Francisco today. [[1]](https://www.google.com/search?q=weather+san+francisco)
+     Example Response:
+     It's 70 degrees and sunny in San Francisco today. [[1]](https:www.google.com/search?q=weather+san+francisco)
 
-    Input:
-    ${userMessage.content.trim()}
+     Input:
+     ${userMessage.content.trim()}
 
-    Sources:
-    ${filteredSources.map((source) => {
-      return endent`
-      ${source.title} (${source.link}):
-      ${source.text}
-      `;
-    })}
-
-    Response:
-    `;
+     Response:
+     `;
 
     const answerMessage: Message = { role: 'user', content: answerPrompt };
 
-    const answerRes = await fetch(`${OPENAI_API_HOST}/v1/chat/completions`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${key ? key : process.env.OPENAI_API_KEY}`,
-        ...(process.env.OPENAI_ORGANIZATION && {
-          'OpenAI-Organization': process.env.OPENAI_ORGANIZATION,
-        }),
-      },
-      method: 'POST',
-      body: JSON.stringify({
-        model: model.id,
-        messages: [
-          {
-            role: 'system',
-            content: `Use the sources to provide an accurate response. Respond in markdown format. Cite the sources you used as [1](link), etc, as you use them.`,
-          },
-          answerMessage,
-        ],
-        max_tokens: 1000,
-        temperature: 1,
-        stream: false,
-      }),
-    });
 
-    const { choices: choices2 } = await answerRes.json();
-    const answer = choices2[0].message.content;
-
-    res.status(200).json({ answer });
+    res.status(200).json({promp: answerPrompt, sources:filteredSources});
   } catch (error) {
     return new Response('Error', { status: 500 });
   }

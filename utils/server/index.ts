@@ -27,6 +27,7 @@ export const OpenAIStream = async (
   key: string,
   messages: Message[],
 ) => {
+
   const res = await fetch(`${OPENAI_API_HOST}/v1/chat/completions`, {
     headers: {
       'Content-Type': 'application/json',
@@ -46,13 +47,16 @@ export const OpenAIStream = async (
         ...messages,
       ],
       max_tokens: 1000,
-      temperature: 1,
+      temperature: 0,
       stream: true,
     }),
   });
 
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
+
+  if (res.status === 200) {
+    console.log('res from openai')}
 
   if (res.status !== 200) {
     const result = await res.json();
@@ -85,9 +89,23 @@ export const OpenAIStream = async (
 
           try {
             const json = JSON.parse(data);
+            
             const text = json.choices[0].delta.content;
+            
+            if (text == " $"){ 
+              const queue = encoder.encode(" \\$");
+              controller.enqueue(queue);
+            }
+            else if (text == "$"){ 
+              const queue = encoder.encode("\\$");
+              controller.enqueue(queue);
+            }
+            else {
             const queue = encoder.encode(text);
             controller.enqueue(queue);
+            }
+            
+
           } catch (e) {
             controller.error(e);
           }

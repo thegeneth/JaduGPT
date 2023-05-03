@@ -16,6 +16,7 @@ interface Props {
 
 export const ChatMessage: FC<Props> = memo(
   ({ message, messageIndex, onEditMessage }) => {
+    
     const { t } = useTranslation('chat');
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isTyping, setIsTyping] = useState<boolean>(false);
@@ -70,9 +71,11 @@ export const ChatMessage: FC<Props> = memo(
       }
     }, [isEditing]);
 
+
+    if (message.role !== 'system'){
     return (
       <div
-        className={`group px-4 ${
+        className={`group px-4   ${
           message.role === 'assistant'
             ? 'border-b border-black/10 bg-gray-50 text-gray-800 dark:border-gray-900/50 dark:bg-[#444654] dark:text-gray-100'
             : 'border-b border-black/10 bg-white text-gray-800 dark:border-gray-900/50 dark:bg-[#343541] dark:text-gray-100'
@@ -107,7 +110,7 @@ export const ChatMessage: FC<Props> = memo(
                       }}
                     />
 
-                    <div className="mt-10 flex justify-center space-x-4">
+                    <div className="mt-10 flex justify-center space-x-4 ">
                       <button
                         className="h-[40px] rounded-md bg-blue-500 px-4 py-1 text-sm font-medium text-white enabled:hover:bg-blue-600 disabled:opacity-50"
                         onClick={handleEditMessage}
@@ -127,7 +130,7 @@ export const ChatMessage: FC<Props> = memo(
                     </div>
                   </div>
                 ) : (
-                  <div className="prose whitespace-pre-wrap dark:prose-invert">
+                  <div className="prose whitespace-pre-wrap dark:prose-invert ">
                     {message.content}
                   </div>
                 )}
@@ -149,7 +152,7 @@ export const ChatMessage: FC<Props> = memo(
             ) : (
               <>
                 <div
-                  className={`absolute ${
+                  className={`absolute  ${
                     window.innerWidth < 640
                       ? 'right-3 bottom-1'
                       : 'right-0 top-[26px] m-0'
@@ -171,7 +174,7 @@ export const ChatMessage: FC<Props> = memo(
                 </div>
 
                 <MemoizedReactMarkdown
-                  className="prose dark:prose-invert"
+                  className="prose dark:prose-invert "
                   remarkPlugins={[remarkGfm, remarkMath]}
                   rehypePlugins={[rehypeMathjax]}
                   components={{
@@ -221,7 +224,7 @@ export const ChatMessage: FC<Props> = memo(
           </div>
         </div>
       </div>
-    );
+    )} else return <></>;
   },
 );
 ChatMessage.displayName = 'ChatMessage';

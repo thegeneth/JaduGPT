@@ -5,12 +5,11 @@ export interface Message {
   content: string;
 }
 
-export type Role = 'assistant' | 'user';
+export type Role = 'assistant' | 'user' | 'system';
 
 export interface ChatBody {
   model: OpenAIModel;
   messages: Message[];
-  key: string;
   prompt: string;
 }
 
@@ -21,4 +20,8 @@ export interface Conversation {
   model: OpenAIModel;
   prompt: string;
   folderId: string | null;
+}
+
+export interface GooglePromp {
+  prompt: string;
 }

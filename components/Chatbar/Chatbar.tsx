@@ -16,8 +16,6 @@ interface Props {
   conversations: Conversation[];
   lightMode: 'light' | 'dark';
   selectedConversation: Conversation;
-  apiKey: string;
-  pluginKeys: PluginKey[];
   folders: Folder[];
   onCreateFolder: (name: string) => void;
   onDeleteFolder: (folderId: string) => void;
@@ -30,12 +28,9 @@ interface Props {
     conversation: Conversation,
     data: KeyValuePair,
   ) => void;
-  onApiKeyChange: (apiKey: string) => void;
   onClearConversations: () => void;
   onExportConversations: () => void;
   onImportConversations: (data: SupportedExportFormats) => void;
-  onPluginKeyChange: (pluginKey: PluginKey) => void;
-  onClearPluginKey: (pluginKey: PluginKey) => void;
 }
 
 export const Chatbar: FC<Props> = ({
@@ -43,8 +38,6 @@ export const Chatbar: FC<Props> = ({
   conversations,
   lightMode,
   selectedConversation,
-  apiKey,
-  pluginKeys,
   folders,
   onCreateFolder,
   onDeleteFolder,
@@ -54,12 +47,9 @@ export const Chatbar: FC<Props> = ({
   onSelectConversation,
   onDeleteConversation,
   onUpdateConversation,
-  onApiKeyChange,
   onClearConversations,
   onExportConversations,
   onImportConversations,
-  onPluginKeyChange,
-  onClearPluginKey,
 }) => {
   const { t } = useTranslation('sidebar');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -197,16 +187,11 @@ export const Chatbar: FC<Props> = ({
 
       <ChatbarSettings
         lightMode={lightMode}
-        apiKey={apiKey}
-        pluginKeys={pluginKeys}
         conversationsCount={conversations.length}
         onToggleLightMode={onToggleLightMode}
-        onApiKeyChange={onApiKeyChange}
         onClearConversations={onClearConversations}
         onExportConversations={onExportConversations}
         onImportConversations={onImportConversations}
-        onPluginKeyChange={onPluginKeyChange}
-        onClearPluginKey={onClearPluginKey}
       />
     </div>
   );

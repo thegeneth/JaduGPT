@@ -5,17 +5,17 @@ import { Promptbar } from '@/components/Promptbar/Promptbar';
 import { ChatBody, Conversation, Message } from '@/types/chat';
 import { KeyValuePair } from '@/types/data';
 import { ErrorMessage } from '@/types/error';
+import { GooglePromp } from '@/types/chat';
+
 import { LatestExportFormat, SupportedExportFormats } from '@/types/export';
 import { Folder, FolderType } from '@/types/folder';
 import {
+  fallbackModelID,
   OpenAIModel,
   OpenAIModelID,
   OpenAIModels,
-  fallbackModelID,
 } from '@/types/openai';
-import { Plugin, PluginKey } from '@/types/plugin';
 import { Prompt } from '@/types/prompt';
-import { getEndpoint } from '@/utils/app/api';
 import {
   cleanConversationHistory,
   cleanSelectedConversation,
@@ -35,33 +35,40 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Head from 'next/head';
 import { useEffect, useRef, useState } from 'react';
-import toast from 'react-hot-toast';
 import { v4 as uuidv4 } from 'uuid';
+import toast from 'react-hot-toast';
+import endent from 'endent';
+
+import { redirect, useRouter  } from 'next/navigation';
+import { Plugin } from '@/types/plugin';
+
+import { getEndpoint } from '@/utils/app/api';
+
 
 interface HomeProps {
   serverSideApiKeyIsSet: boolean;
-  serverSidePluginKeysSet: boolean;
   defaultModelId: OpenAIModelID;
 }
 
-const Home: React.FC<HomeProps> = ({
+const App: React.FC<HomeProps> = ({
   serverSideApiKeyIsSet,
-  serverSidePluginKeysSet,
   defaultModelId,
 }) => {
   const { t } = useTranslation('chat');
+  
+  const [loaded, setLoaded] = useState(true)
 
   // STATE ----------------------------------------------
 
-  const [apiKey, setApiKey] = useState<string>('');
-  const [pluginKeys, setPluginKeys] = useState<PluginKey[]>([]);
+  // STATE ---------------------------------OpenAIModel-------------
+
   const [loading, setLoading] = useState<boolean>(false);
   const [lightMode, setLightMode] = useState<'dark' | 'light'>('dark');
   const [messageIsStreaming, setMessageIsStreaming] = useState<boolean>(false);
 
   const [modelError, setModelError] = useState<ErrorMessage | null>(null);
 
-  const [models, setModels] = useState<OpenAIModel[]>([]);
+  const [models, setModels] = useState<[]>([]);
 
   const [folders, setFolders] = useState<Folder[]>([]);
 
@@ -73,38 +80,71 @@ const Home: React.FC<HomeProps> = ({
   const [showSidebar, setShowSidebar] = useState<boolean>(true);
 
   const [prompts, setPrompts] = useState<Prompt[]>([]);
-  const [showPromptbar, setShowPromptbar] = useState<boolean>(true);
+  const [showPromptbar, setShowPromptbar] = useState<boolean>(false);
 
+  const [sendGooglePromp, setSendGooglePrompt] = useState<boolean>(false)
   // REFS ----------------------------------------------
 
   const stopConversationRef = useRef<boolean>(false);
 
+  const [googlePromp, setGooglePromp] = useState<Message>()
+
+  const removeSystemMessages = (conversation: Conversation): [Conversation, boolean] => {
+    const originalLength = conversation.messages.length;
+    const filteredMessages = conversation.messages.filter(message => message.role !== "system");
+    const updatedConversation = { ...conversation, messages: filteredMessages };
+    const hasSystemMessages = originalLength !== filteredMessages.length;
+    return [updatedConversation, hasSystemMessages];
+  };
+
+  useEffect(() => {
+    let hasSystemMessages = false;
+    
+    const newConversations = conversations.map(conversation => {
+      const [updatedConversation, hadSystemMessages] = removeSystemMessages(conversation);
+      hasSystemMessages = hasSystemMessages || hadSystemMessages;
+      return updatedConversation;
+    });
+  
+    if (selectedConversation) {
+      const [newSelectedConversation, hadSystemMessages] = removeSystemMessages(selectedConversation);
+      hasSystemMessages = hasSystemMessages || hadSystemMessages;
+      if (hadSystemMessages) {
+        setSelectedConversation(newSelectedConversation);
+      }
+    }
+  
+    if (hasSystemMessages) {
+      setConversations(newConversations);
+    }
+  }, [selectedConversation, conversations]);
+  
+
   // FETCH RESPONSE ----------------------------------------------
 
-  const handleSend = async (
-    message: Message,
-    deleteCount = 0,
-    plugin: Plugin | null = null,
-  ) => {
+  const handleSend = async (message: Message, deleteCount = 0, plugin: Plugin | null = null) => {
+  
     if (selectedConversation) {
       let updatedConversation: Conversation;
 
-      if (deleteCount) {
-        const updatedMessages = [...selectedConversation.messages];
-        for (let i = 0; i < deleteCount; i++) {
-          updatedMessages.pop();
-        }
+      
+        if (deleteCount && message.role !== 'system') {
+          const updatedMessages = [...selectedConversation.messages];
+          for (let i = 0; i < deleteCount; i++) {
+            updatedMessages.pop();
+          }
 
-        updatedConversation = {
-          ...selectedConversation,
-          messages: [...updatedMessages, message],
-        };
-      } else {
-        updatedConversation = {
-          ...selectedConversation,
-          messages: [...selectedConversation.messages, message],
-        };
-      }
+          updatedConversation = {
+            ...selectedConversation,
+            messages: [...updatedMessages, message],
+          };
+        } else {
+          updatedConversation = {
+            ...selectedConversation,
+            messages: [...selectedConversation.messages, message],
+          };
+        }
+      
 
       setSelectedConversation(updatedConversation);
       setLoading(true);
@@ -113,28 +153,32 @@ const Home: React.FC<HomeProps> = ({
       const chatBody: ChatBody = {
         model: updatedConversation.model,
         messages: updatedConversation.messages,
-        key: apiKey,
         prompt: updatedConversation.prompt,
       };
+
+      
 
       const endpoint = getEndpoint(plugin);
       let body;
 
+      
+      const replacer = (key:string, value:any) => {
+        if (key === 'prompt') {
+          return localStorage.getItem('sysPromp'); // replace name value with uppercase
+        }
+        return value; // otherwise return the original value
+      };
+
       if (!plugin) {
-        body = JSON.stringify(chatBody);
+        body = JSON.stringify(chatBody, replacer);
       } else {
-        body = JSON.stringify({
-          ...chatBody,
-          googleAPIKey: pluginKeys
-            .find((key) => key.pluginId === 'google-search')
-            ?.requiredKeys.find((key) => key.key === 'GOOGLE_API_KEY')?.value,
-          googleCSEId: pluginKeys
-            .find((key) => key.pluginId === 'google-search')
-            ?.requiredKeys.find((key) => key.key === 'GOOGLE_CSE_ID')?.value,
-        });
+        body = JSON.stringify(chatBody);
       }
 
       const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+      }, 60000);
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -158,7 +202,6 @@ const Home: React.FC<HomeProps> = ({
         setMessageIsStreaming(false);
         return;
       }
-
       if (!plugin) {
         if (updatedConversation.messages.length === 1) {
           const { content } = message;
@@ -232,8 +275,19 @@ const Home: React.FC<HomeProps> = ({
         const updatedConversations: Conversation[] = conversations.map(
           (conversation) => {
             if (conversation.id === selectedConversation.id) {
+
+              updatedConversation = {
+                ...selectedConversation,
+                messages: [...selectedConversation.messages.filter(message => message.role !== 'system'), message],
+              };
+
               return updatedConversation;
             }
+
+            conversation = {
+              ...conversation,
+              messages: [...conversation.messages.filter(message => message.role !== 'system'), message],
+            };
 
             return conversation;
           },
@@ -245,46 +299,40 @@ const Home: React.FC<HomeProps> = ({
 
         setConversations(updatedConversations);
         saveConversations(updatedConversations);
-
         setMessageIsStreaming(false);
       } else {
-        const { answer } = await response.json();
+        const data = await response.json();
 
-        const updatedMessages: Message[] = [
-          ...updatedConversation.messages,
-          { role: 'assistant', content: answer },
-        ];
-
-        updatedConversation = {
-          ...updatedConversation,
-          messages: updatedMessages,
-        };
-
-        setSelectedConversation(updatedConversation);
-        saveConversation(updatedConversation);
-
-        const updatedConversations: Conversation[] = conversations.map(
-          (conversation) => {
-            if (conversation.id === selectedConversation.id) {
-              return updatedConversation;
-            }
-
-            return conversation;
-          },
-        );
-
-        if (updatedConversations.length === 0) {
-          updatedConversations.push(updatedConversation);
+        localStorage.setItem('sysPromp',data.promp)
+        interface Source {
+          title: string;
+          link: string;
+          text: string;
         }
 
-        setConversations(updatedConversations);
-        saveConversations(updatedConversations);
 
+        const sources = data.sources.map((source: Source) => {
+          return endent`
+          Title: ${source.title}, Link: (${source.link}):
+            Content:${source.text}
+            `;
+          })
+                
+        setGooglePromp(sources)
+        setSendGooglePrompt(true)
+        
         setLoading(false);
         setMessageIsStreaming(false);
       }
     }
   };
+
+  useEffect(()=>{
+    if (sendGooglePromp){
+      handleSend({role: 'system', content: `${googlePromp}`},0)
+      setSendGooglePrompt(false)
+    }
+  },[sendGooglePromp])
 
   // FETCH MODELS ----------------------------------------------
 
@@ -309,6 +357,8 @@ const Home: React.FC<HomeProps> = ({
         key,
       }),
     });
+
+    
 
     if (!response.ok) {
       try {
@@ -340,49 +390,6 @@ const Home: React.FC<HomeProps> = ({
     localStorage.setItem('theme', mode);
   };
 
-  const handleApiKeyChange = (apiKey: string) => {
-    setApiKey(apiKey);
-    localStorage.setItem('apiKey', apiKey);
-  };
-
-  const handlePluginKeyChange = (pluginKey: PluginKey) => {
-    if (pluginKeys.some((key) => key.pluginId === pluginKey.pluginId)) {
-      const updatedPluginKeys = pluginKeys.map((key) => {
-        if (key.pluginId === pluginKey.pluginId) {
-          return pluginKey;
-        }
-
-        return key;
-      });
-
-      setPluginKeys(updatedPluginKeys);
-
-      localStorage.setItem('pluginKeys', JSON.stringify(updatedPluginKeys));
-    } else {
-      setPluginKeys([...pluginKeys, pluginKey]);
-
-      localStorage.setItem(
-        'pluginKeys',
-        JSON.stringify([...pluginKeys, pluginKey]),
-      );
-    }
-  };
-
-  const handleClearPluginKey = (pluginKey: PluginKey) => {
-    const updatedPluginKeys = pluginKeys.filter(
-      (key) => key.pluginId !== pluginKey.pluginId,
-    );
-
-    if (updatedPluginKeys.length === 0) {
-      setPluginKeys([]);
-      localStorage.removeItem('pluginKeys');
-      return;
-    }
-
-    setPluginKeys(updatedPluginKeys);
-
-    localStorage.setItem('pluginKeys', JSON.stringify(updatedPluginKeys));
-  };
 
   const handleToggleChatbar = () => {
     setShowSidebar(!showSidebar);
@@ -478,6 +485,7 @@ const Home: React.FC<HomeProps> = ({
   // CONVERSATION OPERATIONS  --------------------------------------------
 
   const handleNewConversation = () => {
+    localStorage.setItem('sysPromp', 'You are Clairk, a large language model trained by OpenAI. Follow the users instructions carefully. Respond using markdown.');
     const lastConversation = conversations[conversations.length - 1];
 
     const newConversation: Conversation = {
@@ -597,6 +605,8 @@ const Home: React.FC<HomeProps> = ({
   // PROMPT OPERATIONS --------------------------------------------
 
   const handleCreatePrompt = () => {
+    const lastPrompt = prompts[prompts.length - 1];
+
     const newPrompt: Prompt = {
       id: uuidv4(),
       name: `Prompt ${prompts.length + 1}`,
@@ -646,11 +656,6 @@ const Home: React.FC<HomeProps> = ({
     }
   }, [selectedConversation]);
 
-  useEffect(() => {
-    if (apiKey) {
-      fetchModels(apiKey);
-    }
-  }, [apiKey]);
 
   // ON LOAD --------------------------------------------
 
@@ -660,23 +665,6 @@ const Home: React.FC<HomeProps> = ({
       setLightMode(theme as 'dark' | 'light');
     }
 
-    const apiKey = localStorage.getItem('apiKey');
-    if (serverSideApiKeyIsSet) {
-      fetchModels('');
-      setApiKey('');
-      localStorage.removeItem('apiKey');
-    } else if (apiKey) {
-      setApiKey(apiKey);
-      fetchModels(apiKey);
-    }
-
-    const pluginKeys = localStorage.getItem('pluginKeys');
-    if (serverSidePluginKeysSet) {
-      setPluginKeys([]);
-      localStorage.removeItem('pluginKeys');
-    } else if (pluginKeys) {
-      setPluginKeys(JSON.parse(pluginKeys));
-    }
 
     if (window.innerWidth < 640) {
       setShowSidebar(false);
@@ -732,10 +720,13 @@ const Home: React.FC<HomeProps> = ({
     }
   }, [serverSideApiKeyIsSet]);
 
+  useEffect(()=>{localStorage.setItem('SysPromp','')},[])
+
+
   return (
     <>
       <Head>
-        <title>JaduGPT</title>
+        <title>Clairk</title>
         <meta name="description" content="ChatGPT but better." />
         <meta
           name="viewport"
@@ -753,7 +744,6 @@ const Home: React.FC<HomeProps> = ({
               onNewConversation={handleNewConversation}
             />
           </div>
-
           <div className="flex h-full w-full pt-[48px] sm:pt-0">
             {showSidebar ? (
               <div>
@@ -762,8 +752,6 @@ const Home: React.FC<HomeProps> = ({
                   conversations={conversations}
                   lightMode={lightMode}
                   selectedConversation={selectedConversation}
-                  apiKey={apiKey}
-                  pluginKeys={pluginKeys}
                   folders={folders.filter((folder) => folder.type === 'chat')}
                   onToggleLightMode={handleLightMode}
                   onCreateFolder={(name) => handleCreateFolder(name, 'chat')}
@@ -773,12 +761,9 @@ const Home: React.FC<HomeProps> = ({
                   onSelectConversation={handleSelectConversation}
                   onDeleteConversation={handleDeleteConversation}
                   onUpdateConversation={handleUpdateConversation}
-                  onApiKeyChange={handleApiKeyChange}
                   onClearConversations={handleClearConversations}
                   onExportConversations={handleExportData}
                   onImportConversations={handleImportConversations}
-                  onPluginKeyChange={handlePluginKeyChange}
-                  onClearPluginKey={handleClearPluginKey}
                 />
 
                 <button
@@ -800,13 +785,10 @@ const Home: React.FC<HomeProps> = ({
                 <IconArrowBarRight />
               </button>
             )}
-
             <div className="flex flex-1">
               <Chat
                 conversation={selectedConversation}
                 messageIsStreaming={messageIsStreaming}
-                apiKey={apiKey}
-                serverSideApiKeyIsSet={serverSideApiKeyIsSet}
                 defaultModelId={defaultModelId}
                 modelError={modelError}
                 models={models}
@@ -818,7 +800,6 @@ const Home: React.FC<HomeProps> = ({
                 stopConversationRef={stopConversationRef}
               />
             </div>
-
             {showPromptbar ? (
               <div>
                 <Promptbar
@@ -856,7 +837,7 @@ const Home: React.FC<HomeProps> = ({
     </>
   );
 };
-export default Home;
+export default App;
 
 export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
   const defaultModelId =
@@ -867,20 +848,10 @@ export const getServerSideProps: GetServerSideProps = async ({ locale }) => {
       process.env.DEFAULT_MODEL) ||
     fallbackModelID;
 
-  let serverSidePluginKeysSet = false;
-
-  const googleApiKey = process.env.GOOGLE_API_KEY;
-  const googleCSEId = process.env.GOOGLE_CSE_ID;
-
-  if (googleApiKey && googleCSEId) {
-    serverSidePluginKeysSet = true;
-  }
-
   return {
     props: {
       serverSideApiKeyIsSet: !!process.env.OPENAI_API_KEY,
       defaultModelId,
-      serverSidePluginKeysSet,
       ...(await serverSideTranslations(locale ?? 'en', [
         'common',
         'chat',

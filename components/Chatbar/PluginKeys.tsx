@@ -7,13 +7,11 @@ import { SidebarButton } from '../Sidebar/SidebarButton';
 interface Props {
   pluginKeys: PluginKey[];
   onPluginKeyChange: (pluginKey: PluginKey) => void;
-  onClearPluginKey: (pluginKey: PluginKey) => void;
 }
 
 export const PluginKeys: FC<Props> = ({
   pluginKeys,
   onPluginKeyChange,
-  onClearPluginKey,
 }) => {
   const { t } = useTranslation('sidebar');
 
