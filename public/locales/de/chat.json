@@ -4,7 +4,7 @@
   "Stop Generating": "Generieren stoppen",
   "Prompt limit is {{maxLength}} characters": "Das Eingabelimit liegt bei {{maxLength}} Zeichen",
   "System Prompt": "Systemaufforderung",
-  "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.": "Du bist ChatGPT, ein großes Sprachmodell, das von OpenAI trainiert wurde. Befolge die Anweisungen des Benutzers sorgfältig. Antworte in Markdown-Format.",
+  "You are JaduGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.": "Du bist JaduGPT, ein großes Sprachmodell, das von OpenAI trainiert wurde. Befolge die Anweisungen des Benutzers sorgfältig. Antworte in Markdown-Format.",
   "Enter a prompt": "Gib eine Anweisung ein",
   "Regenerate response": "Antwort erneut generieren",
   "Sorry, there was an error.": "Entschuldigung, es ist ein Fehler aufgetreten.",
@@ -23,6 +23,6 @@
   "click if using a .env.local file": "click if using a .env.local file",
   "Message limit is {{maxLength}} characters. You have entered {{valueLength}} characters.": "Das Nachrichtenlimit beträgt {{maxLength}} Zeichen. Du hast bereits {{valueLength}} Zeichen eingegeben.",
   "Please enter a message": "Bitte gib eine Nachricht ein",
-  "JaduGPT is an advanced chatbot kit for OpenAI's chat models aiming to mimic ChatGPT's interface and functionality.": "JaduGPT ist ein fortschrittliches Chatbot-Toolkit für OpenAI's Chat-Modelle, das darauf abzielt, die Benutzeroberfläche und Funktionalität von ChatGPT nachzuahmen.",
+  "JaduGPT is an advanced chatbot kit for OpenAI's chat models aiming to mimic JaduGPT's interface and functionality.": "JaduGPT ist ein fortschrittliches Chatbot-Toolkit für OpenAI's Chat-Modelle, das darauf abzielt, die Benutzeroberfläche und Funktionalität von JaduGPT nachzuahmen.",
   "Are you sure you want to clear all messages?": "Bist du sicher, dass du alle Nachrichten löschen möchtest?"
 }

@@ -356,9 +356,7 @@ const App: React.FC<HomeProps> = ({
       body: JSON.stringify({
         key,
       }),
-    });
-
-    
+    });    
 
     if (!response.ok) {
       try {
@@ -485,7 +483,7 @@ const App: React.FC<HomeProps> = ({
   // CONVERSATION OPERATIONS  --------------------------------------------
 
   const handleNewConversation = () => {
-    localStorage.setItem('sysPromp', 'You are Clairk, a large language model trained by OpenAI. Follow the users instructions carefully. Respond using markdown.');
+    localStorage.setItem('sysPromp', 'You are JaduGPT, a large language model trained by OpenAI. Follow the users instructions carefully. Respond using markdown.');
     const lastConversation = conversations[conversations.length - 1];
 
     const newConversation: Conversation = {
@@ -721,19 +719,22 @@ const App: React.FC<HomeProps> = ({
   }, [serverSideApiKeyIsSet]);
 
   useEffect(()=>{localStorage.setItem('SysPromp','')},[])
+  useEffect(()=>{localStorage.setItem('Addy','')},[])
+  useEffect(()=>{localStorage.setItem('Holder','false')},[])
 
 
   return (
     <>
       <Head>
-        <title>Clairk</title>
-        <meta name="description" content="ChatGPT but better." />
+        <title>JaduGPT</title>
+        <meta name="description" content="JaduGPT but better." />
         <meta
           name="viewport"
           content="height=device-height ,width=device-width, initial-scale=1, user-scalable=no"
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      
       {selectedConversation && (
         <main
           className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}

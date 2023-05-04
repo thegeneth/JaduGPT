@@ -4,7 +4,7 @@
   "Stop Generating": "උත්පාදනය නවත්වන්න",
   "Prompt limit is {{maxLength}} characters": "වචන සීමාව අනුලකුණු {{maxLength}} කි",
   "System Prompt": "පද්ධති ඉඟිය",
-  "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.": "ඔබ ChatGPT, OpenAI විසින් පුහුණු කරන ලද විශාල භාෂා ආකෘතියකි. පරිශීලක උපදෙස් ප්රවේශමෙන් අනුගමනය කරන්න. මාර්ක්ඩවුන් භාවිතයෙන් ප්‍රතිචාර දක්වන්න.",
+  "You are JaduGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.": "ඔබ JaduGPT, OpenAI විසින් පුහුණු කරන ලද විශාල භාෂා ආකෘතියකි. පරිශීලක උපදෙස් ප්රවේශමෙන් අනුගමනය කරන්න. මාර්ක්ඩවුන් භාවිතයෙන් ප්‍රතිචාර දක්වන්න.",
   "Enter a prompt": "ප්‍රේරකයක් ඇතුළු කරන්න",
   "Regenerate response": "ප්‍රතිචාරය පුනර්ජනනය කරන්න",
   "Sorry, there was an error.": "සමාවන්න, දෝෂයක් ඇති විය.",
@@ -23,6 +23,6 @@
   "click if using a .env.local file": "click if using a .env.local file",
   "Message limit is {{maxLength}} characters. You have entered {{valueLength}} characters.": "පණිවිඩ සීමාව අකුරු {{maxLength}} කි. ඔබ අක්ෂර {{valueLength}} ඇතුළත් කර ඇත.।",
   "Please enter a message": "කරුණාකර පණිවිඩයක් ඇතුළු කරන්න",
-  "JaduGPT is an advanced chatbot kit for OpenAI's chat models aiming to mimic ChatGPT's interface and functionality.": "JaduGPT යනු ChatGPT හි අතුරු මුහුණත සහ ක්‍රියාකාරීත්වය අනුකරණය කිරීම අරමුණු කරගත් OpenAI හි චැට් මාදිලි සඳහා වන උසස් චැට්බෝට් කට්ටලයකි.",
+  "JaduGPT is an advanced chatbot kit for OpenAI's chat models aiming to mimic JaduGPT's interface and functionality.": "JaduGPT යනු JaduGPT හි අතුරු මුහුණත සහ ක්‍රියාකාරීත්වය අනුකරණය කිරීම අරමුණු කරගත් OpenAI හි චැට් මාදිලි සඳහා වන උසස් චැට්බෝට් කට්ටලයකි.",
   "Are you sure you want to clear all messages?": "ඔබට සියලු පණිවිඩ හිස් කිරීමට අවශ්‍ය බව විශ්වාසද?"
 }

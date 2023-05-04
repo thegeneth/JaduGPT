@@ -10,6 +10,9 @@ import { ClearConversations } from './ClearConversations';
 import { useState } from 'react';
 import { Addy } from '@/types/opensea';
 
+interface Window {
+  ethereum: any
+}
 
 interface Props {
   lightMode: 'light' | 'dark';
@@ -35,7 +38,9 @@ export  const ChatbarSettings: FC<Props> = ({
   const [holder,setHolder] = useState(false)
 
   useEffect(() => {
-    console.log(holder)
+    if (holder === true){
+      localStorage.setItem('Holder',true)
+    }
   },[holder])
   
 
@@ -56,6 +61,7 @@ export  const ChatbarSettings: FC<Props> = ({
           const data = await response.json();
           if (data.length >= 1 ){
             setHolder(true)
+            
           }
         } else {
           console.error('Request failed with status:', response.status);

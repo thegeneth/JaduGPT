@@ -4,7 +4,7 @@
   "Stop Generating": "إيقاف التوليد",
   "Prompt limit is {{maxLength}} characters": "حرفًا {{maxLength}} حد المطالبة هو",
   "System Prompt": "مطالبة النظام",
-  "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.": "أنت شات جبت نموذج لغة كبير تم تدريبه بواسطة أوبن أيه أي. اتبع تعليمات المستخدم بعناية. الرد باستخدام الماركداون",
+  "You are JaduGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.": "أنت شات جبت نموذج لغة كبير تم تدريبه بواسطة أوبن أيه أي. اتبع تعليمات المستخدم بعناية. الرد باستخدام الماركداون",
   "Enter a prompt": "أدخل المطالبة",
   "Regenerate response": "إعادة توليد الرد",
   "Sorry, there was an error.": "عذرًا، حدث خطأ",
@@ -32,6 +32,6 @@
   
   
   "Please enter a message": "يرجى إدخال رسالة",
-  "JaduGPT is an advanced chatbot kit for OpenAI's chat models aiming to mimic ChatGPT's interface and functionality.": "JaduGPT هي مجموعة متقدمة للدردشة تستخدم",
+  "JaduGPT is an advanced chatbot kit for OpenAI's chat models aiming to mimic JaduGPT's interface and functionality.": "JaduGPT هي مجموعة متقدمة للدردشة تستخدم",
   "Are you sure you want to clear all messages?": "هل أنت متأكد أنك تريد مسح كافة الرسائل؟"
 }

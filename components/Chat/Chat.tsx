@@ -24,8 +24,11 @@ import { ModelSelect } from './ModelSelect';
 import { SystemPrompt } from './SystemPrompt';
 import { Plugin } from '@/types/plugin';
 import { PluginSelect } from './PluginSelect';
+import { Addy } from '@/types/opensea';
 
-
+interface Window {
+  ethereum: any
+}
 
 interface Props {
   conversation: Conversation;
@@ -152,12 +155,67 @@ export const Chat: FC<Props> = memo(
         }
       };
     }, [messagesEndRef]);
+  
+  const [addy,setAddy] = useState(null)
+  const [holder,setHolder] = useState(false)
 
+  useEffect(() => {
+    if (addy !== null){
+    const fetchData = async () => {
+      try {
+        const body = JSON.stringify(addy);
+        const response = await fetch('api/opensea/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body
+        });
+          
+        if (response.ok) {
+          const data = await response.json();
+          if (data.length >= 1 ){
+            setHolder(true)
+            
+          }
+        } else {
+          console.error('Request failed with status:', response.status);
+        }
+        setAddy(null)
+      } catch (error) {
+        console.error('An error occurred:', error);
+      }
+    };
+  
+    fetchData();
+  }}, [addy]);
+
+  const handleConnect = (addy: Addy) => {
+    if(window.ethereum) {
+        window.ethereum.request({method: 'eth_requestAccounts'}).then(res => {
+            setAddy(res[0])
+            })
+        }
+    else{
+          alert("install metamask extension!!")
+    }}
 
     return (
       <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#343541]">
-        {modelError ? (
-          <ErrorMessageDiv error={modelError} />
+        {!holder ? (
+          <>
+          <div className="mx-auto flex w-[350px] flex-col space-y-10 pt-12 sm:w-[600px]">
+            <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
+              <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600 mb-[75px]">
+                <button
+                onClick={handleConnect}
+                >
+                <h1>Connect</h1>
+                </button>
+              </div>
+            </div>
+          </div>
+          </>
         ) : (
           <>
             <div
@@ -172,10 +230,6 @@ export const Chat: FC<Props> = memo(
                   <div className="mx-auto flex w-[350px] flex-col space-y-10 pt-12 sm:w-[600px]">
                     <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
                       <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600 mb-[75px]">
-                      <div className="card">
-                        <div className="card-body">
-                        </div> 
-                      </div>
                       <SystemPrompt
                           conversation={conversation}
                           prompts={prompts}
