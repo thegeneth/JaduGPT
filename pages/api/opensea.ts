@@ -3,7 +3,12 @@ import { Addy } from "@/types/opensea";
 export const config = {
   runtime: 'edge',
 };
-
+interface Asset {
+  asset_contract: {
+    address: string;
+    
+  };}
+  
 const handler = async (req: Request): Promise<Response> => {
   try {  
 
@@ -36,7 +41,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const JaduContractList = ["0xd0F0C40FCD1598721567F140eBf8aF436e7b97cF","0xeDa3b617646B5fc8C9c696e0356390128cE900F8","0x86fc6f6c6702ceF7d3BaE87eF41256715416DB71"].map((address) => address.toLowerCase());
 
-    const jaduAssets = json.assets.filter((asset) => {
+    const jaduAssets = json.assets.filter((asset: Asset) => {
       const contract = asset.asset_contract.address.toLowerCase();
       return JaduContractList.includes(contract);
     });
