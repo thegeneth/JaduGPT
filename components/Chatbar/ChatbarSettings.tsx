@@ -10,10 +10,6 @@ import { ClearConversations } from './ClearConversations';
 import { useState } from 'react';
 import { Addy } from '@/types/opensea';
 
-interface Window {
-  ethereum: any
-}
-
 interface Props {
   lightMode: 'light' | 'dark';
   conversationsCount: number;
@@ -33,57 +29,6 @@ export  const ChatbarSettings: FC<Props> = ({
   onImportConversations,
 }) => {
   const { t } = useTranslation('sidebar');
-
-  const [addy,setAddy] = useState(null)
-  const [holder,setHolder] = useState(false)
-
-  useEffect(() => {
-    if (holder === true){
-      localStorage.setItem('Holder',true)
-    }
-  },[holder])
-  
-
-  useEffect(() => {
-    if (addy !== null){
-    const fetchData = async () => {
-      try {
-        const body = JSON.stringify(addy);
-        const response = await fetch('api/opensea/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body
-        });
-          
-        if (response.ok) {
-          const data = await response.json();
-          if (data.length >= 1 ){
-            setHolder(true)
-            
-          }
-        } else {
-          console.error('Request failed with status:', response.status);
-        }
-        setAddy(null)
-      } catch (error) {
-        console.error('An error occurred:', error);
-      }
-    };
-  
-    fetchData();
-  }}, [addy]);
-
-  const handleConnect = (addy: Addy) => {
-    if(window.ethereum) {
-        window.ethereum.request({method: 'eth_requestAccounts'}).then(res => {
-            setAddy(res[0])
-            })
-        }
-    else{
-          alert("install metamask extension!!")
-    }}
 
   return (
     <div className="flex flex-col items-center space-y-1 border-t border-white/20 pt-1 text-sm">
@@ -108,14 +53,6 @@ export  const ChatbarSettings: FC<Props> = ({
           onToggleLightMode(lightMode === 'light' ? 'dark' : 'light')
         }
       />
-      <SidebarButton
-        text={t('Connect')}
-        onClick={handleConnect}
-        icon={<IconLink size={18}></IconLink>}
-        
-         />
-        
-      
     </div>
   );
 };
