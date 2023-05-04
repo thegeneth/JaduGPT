@@ -44,6 +44,11 @@ import { Plugin } from '@/types/plugin';
 
 import { getEndpoint } from '@/utils/app/api';
 
+declare global {
+  interface Window {
+    ethereum: any
+  }
+}
 
 interface HomeProps {
   serverSideApiKeyIsSet: boolean;
