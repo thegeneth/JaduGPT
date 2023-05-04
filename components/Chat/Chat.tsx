@@ -158,6 +158,7 @@ export const Chat: FC<Props> = memo(
   
   const [addy, setAddy] = useState<string | null>(null);
   const [holder,setHolder] = useState(false)
+  const [notHolder,setNotHolder] = useState(false)
 
   useEffect(() => {
     if (addy !== null){
@@ -174,9 +175,13 @@ export const Chat: FC<Props> = memo(
           
         if (response.ok) {
           const data = await response.json();
+          console.log(data.length)
           if (data.length >= 1 ){
-            setHolder(true)
-            
+            setHolder(true)            
+          }
+          if (data.length === 0 ){
+            setNotHolder(true)
+            alert("This Wallet is not a Jadu NFT holder!! Disconnect this wallet, refresh the page and select another wallet that holds either a Jadu Ava, Jadu Hoverboard or Jadu Jetpack")
           }
         } else {
           console.error('Request failed with status:', response.status);
@@ -205,6 +210,21 @@ export const Chat: FC<Props> = memo(
 
     return (
       <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#343541]">
+        {notHolder && !holder ? (
+          <>
+          <div className="mx-auto flex w-[350px] flex-col space-y-10 pt-12 sm:w-[600px]">
+            <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
+              <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600 mb-[75px]">
+                <button
+                onClick={handleConnect}
+                >
+                <h2>This address is not a Jadu holder. Either buy a Jadu NFT or connect a wallet holding Jadu assets.</h2>
+                </button>
+              </div>
+            </div>
+          </div>
+          </>
+        ):(<></>) }
         {!holder ? (
           <>
           <div className="mx-auto flex w-[350px] flex-col space-y-10 pt-12 sm:w-[600px]">

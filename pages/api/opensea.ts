@@ -8,13 +8,19 @@ interface Asset {
     address: string;
     
   };}
+
+interface Asset2 {
+  image_original_url: string;
+  image_preview_url: string;
+  token_id: string;
+  asset_contract: {
+  name: string;
+  };}
   
 const handler = async (req: Request): Promise<Response> => {
   try {  
 
     const  addy  = await req.json()
-
-    console.log(addy)
 
     const response = await fetch(`https://api.opensea.io/api/v1/assets?owner=${addy}&order_direction=desc&limit=200&include_orders=false`, {
       headers: {
@@ -45,10 +51,16 @@ const handler = async (req: Request): Promise<Response> => {
       const contract = asset.asset_contract.address.toLowerCase();
       return JaduContractList.includes(contract);
     });
-    
-    console.log(jaduAssets)
 
-    return new Response(JSON.stringify(jaduAssets), { status: 200 });
+    const extractedList = jaduAssets.map((obj: Asset2) => ({
+      image_original_url: obj.image_original_url,
+      image_preview_url: obj.image_preview_url,
+      token_id: obj.token_id,
+      collection_name: obj.asset_contract.name,
+    }));
+       
+
+    return new Response(JSON.stringify(extractedList), { status: 200 });
   } catch (error) {
     console.error(error);
     return new Response('Error', { status: 500 });
