@@ -192,11 +192,14 @@ export const Chat: FC<Props> = memo(
 
   const handleConnect = (addy: Addy) => {
     if(window.ethereum) {
-        window.ethereum.request({method: 'eth_requestAccounts'}).then((res:string[]) => {
-            setAddy(res[0])
-            })
+      window.ethereum.request({ method: 'eth_requestAccounts' }).then((res: string[]) => {
+        if (res[0] !== null) {
+          setAddy(res[0]);
+        } else {
+          // Handle the case when res[0] is null
         }
-    else{
+      });
+    } else {
           alert("install metamask extension!!")
     }}
 
