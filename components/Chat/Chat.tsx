@@ -156,7 +156,7 @@ export const Chat: FC<Props> = memo(
       };
     }, [messagesEndRef]);
   
-    const [addy, setAddy] = useState<string | null>(null);
+  const [addy, setAddy] = useState<string | null>(null);
   const [holder,setHolder] = useState(false)
 
   useEffect(() => {
@@ -190,7 +190,7 @@ export const Chat: FC<Props> = memo(
     fetchData();
   }}, [addy]);
 
-  const handleConnect = (addy: Addy) => {
+  const handleConnect = () => {
     if(window.ethereum) {
       window.ethereum.request({ method: 'eth_requestAccounts' }).then((res: string[]) => {
         if (res[0] !== null) {
