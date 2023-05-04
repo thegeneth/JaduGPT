@@ -192,7 +192,7 @@ export const Chat: FC<Props> = memo(
 
   const handleConnect = (addy: Addy) => {
     if(window.ethereum) {
-        window.ethereum.request({method: 'eth_requestAccounts'}).then(res => {
+        window.ethereum.request({method: 'eth_requestAccounts'}).then((res:string[]) => {
             setAddy(res[0])
             })
         }
