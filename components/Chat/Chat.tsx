@@ -156,7 +156,7 @@ export const Chat: FC<Props> = memo(
       };
     }, [messagesEndRef]);
   
-  const [addy,setAddy] = useState(null)
+    const [addy, setAddy] = useState<string | null>(null);
   const [holder,setHolder] = useState(false)
 
   useEffect(() => {
