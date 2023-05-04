@@ -50,6 +50,11 @@ declare global {
   }
 }
 
+interface Msg {
+  content: string;
+  // other properties of the message object
+}
+
 interface HomeProps {
   serverSideApiKeyIsSet: boolean;
   defaultModelId: OpenAIModelID;
@@ -94,6 +99,25 @@ const App: React.FC<HomeProps> = ({
 
   const [googlePromp, setGooglePromp] = useState<Message>()
 
+  
+  useEffect(() => {
+    if (selectedConversation) {
+      // Find the index of the selected conversation in the list of conversations
+      const selectedConversationIndex = conversations.findIndex(
+        conversation => conversation.id === selectedConversation.id
+      );
+  
+      if (selectedConversationIndex !== -1) {
+        // Create a new array with the updated selected conversation
+        const updatedConversations = [...conversations];
+        updatedConversations[selectedConversationIndex] = selectedConversation;
+  
+        // Update the list of conversations
+        setConversations(updatedConversations);
+      }
+    }
+  }, [selectedConversation]);
+
   const removeSystemMessages = (conversation: Conversation): [Conversation, boolean] => {
     const originalLength = conversation.messages.length;
     const filteredMessages = conversation.messages.filter(message => message.role !== "system");
@@ -122,6 +146,7 @@ const App: React.FC<HomeProps> = ({
     if (hasSystemMessages) {
       setConversations(newConversations);
     }
+
   }, [selectedConversation, conversations]);
   
 
@@ -131,37 +156,35 @@ const App: React.FC<HomeProps> = ({
   
     if (selectedConversation) {
       let updatedConversation: Conversation;
-
       
-        if (deleteCount && message.role !== 'system') {
-          const updatedMessages = [...selectedConversation.messages];
-          for (let i = 0; i < deleteCount; i++) {
-            updatedMessages.pop();
-          }
-
-          updatedConversation = {
-            ...selectedConversation,
-            messages: [...updatedMessages, message],
-          };
-        } else {
           updatedConversation = {
             ...selectedConversation,
             messages: [...selectedConversation.messages, message],
           };
-        }
-      
-
+          
       setSelectedConversation(updatedConversation);
       setLoading(true);
       setMessageIsStreaming(true);
+
+      const firstMsg: Msg = {
+        content: updatedConversation?.messages[0]?.content,
+        // other properties of the message object
+      };
+
+      const { content } = firstMsg;
+      const customName =
+        content.length > 30 ? content.substring(0, 30) + '...' : content;
+
+      updatedConversation = {
+        ...updatedConversation,
+        name: customName,
+      };
 
       const chatBody: ChatBody = {
         model: updatedConversation.model,
         messages: updatedConversation.messages,
         prompt: updatedConversation.prompt,
-      };
-
-      
+      };    
 
       const endpoint = getEndpoint(plugin);
       let body;
@@ -207,17 +230,10 @@ const App: React.FC<HomeProps> = ({
         setMessageIsStreaming(false);
         return;
       }
-      if (!plugin) {
-        if (updatedConversation.messages.length === 1) {
-          const { content } = message;
-          const customName =
-            content.length > 30 ? content.substring(0, 30) + '...' : content;
+      
 
-          updatedConversation = {
-            ...updatedConversation,
-            name: customName,
-          };
-        }
+      
+      if (!plugin) {  
 
         setLoading(false);
 
@@ -270,7 +286,6 @@ const App: React.FC<HomeProps> = ({
               ...updatedConversation,
               messages: updatedMessages,
             };
-
             setSelectedConversation(updatedConversation);
           }
         }
@@ -287,21 +302,25 @@ const App: React.FC<HomeProps> = ({
               };
 
               return updatedConversation;
-            }
-
+            } 
             conversation = {
-              ...conversation,
-              messages: [...conversation.messages.filter(message => message.role !== 'system'), message],
+                ...conversation,
+                messages: [...conversation.messages.filter(message => message.role !== 'system')],
             };
 
             return conversation;
           },
         );
 
-        if (updatedConversations.length === 0) {
+        console.log(updatedConversations)
+
+        const isDuplicate = updatedConversations.some(conversation => {
+          return conversation.id === updatedConversation.id;
+        });
+        if (!isDuplicate) {
           updatedConversations.push(updatedConversation);
         }
-
+        
         setConversations(updatedConversations);
         saveConversations(updatedConversations);
         setMessageIsStreaming(false);
