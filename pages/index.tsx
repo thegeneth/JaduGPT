@@ -825,7 +825,7 @@ const App: React.FC<HomeProps> = ({
                 stopConversationRef={stopConversationRef}
               />
             </div>
-            {showPromptbar ? (
+            {/* {showPromptbar ? (
               <div>
                 <Promptbar
                   prompts={prompts}
@@ -855,7 +855,7 @@ const App: React.FC<HomeProps> = ({
               >
                 <IconArrowBarLeft />
               </button>
-            )}
+            )} */}
           </div>
         </main>
       )}
